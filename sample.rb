@@ -36,17 +36,21 @@ class VendingMachine
   end
 end
 
-# class Juice_management
-#
-#   def juice_name
-#     @juice1 = {name: "cola", price: 120, number: 5}
-#     # juice1[:name],[:price],[:number]
-#   end
-#
-# end
-#
-# vm = Juice_management.new
-# vm.juice_name
+class Juice_management
+
+  def juice_name
+    @juice1 = { name: "cola", price: 120, number: 5 }
+    puts @juice1.values_at(:name, :price, :number)
+  end
+
+end
+
+vm = Juice_management.new
+vm.juice_name
+
+
+
+
 
 vm = VendingMachine.new
 
