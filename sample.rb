@@ -62,22 +62,24 @@ class Purchase
       if (number - purchase_number) < 0 || (money - 120 * purchase_number) < 0
         puts "本数を減らしてください"
         maney_and_stock_judge(money, number)
+      else
+
+        # 現在の売り上げ金額
+        current_sales_amount = 120 * purchase_number
+
+        # 在庫
+        stock = number - purchase_number
+
+        # 釣り銭
+        change = money - 120 * purchase_number
+
+        puts "現在の売り上げ金額：#{current_sales_amount}、在庫：#{stock}本、釣り銭：#{change}円"
+
+        # number -= purchase_number
       end
 
-      # 現在の売り上げ金額
-      current_sales_amount = 120 * purchase_number
-
-      # 在庫
-      stock = number - purchase_number
-
-      # 釣り銭
-      change = money - 120 * purchase_number
-
-      puts "現在の売り上げ金額：#{current_sales_amount}、在庫：#{stock}本、釣り銭：#{change}円"
-
-      # number -= purchase_number
-
     else
+      puts "お金か在庫が足りないです"
 
     end
 
