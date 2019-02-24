@@ -20,11 +20,14 @@ class VendingMachine
   # 10円玉、50円玉、100円玉、500円玉、1000円札を１つずつ投入できる。
   # 投入は複数回できる。
   def slot_money(money)
+    puts "続けてお金を投入してください。お金の投入を終了する場合は、10,50,100,500,1000円以外の値を入力してください"
     # 想定外のもの（１円玉や５円玉。千円札以外のお札、そもそもお金じゃないもの（数字以外のもの）など）
     # が投入された場合は、投入金額に加算せず、それをそのまま釣り銭としてユーザに出力する。
-    return false unless MONEY.include?(money)
+    return @slot_money unless MONEY.include?(money)
     # 自動販売機にお金を入れる
     @slot_money += money
+    # 再帰処理
+    slot_money(gets.to_i)
   end
 
   # 払い戻し操作を行うと、投入金額の総計を釣り銭として出力する。
@@ -61,6 +64,7 @@ class Purchase
       # 在庫が0未満の場合、または投入額より購入額が多い場合は再入力
       if (number - purchase_number) < 0 || (money - 120 * purchase_number) < 0
         puts "本数を減らしてください"
+        # 再帰処理
         maney_and_stock_judge(money, number)
       else
 
@@ -94,6 +98,7 @@ pc = Purchase.new
 # 作成した自動販売機に100円を入れる
 # vm.slot_money (100)
 
+
 # 作成した自動販売機に入れたお金がいくらかを確認する（表示する）
 vm.current_slot_money
 
@@ -102,8 +107,8 @@ puts "コーラの情報"
 puts jm.juice_name.values_at(:name, :price, :number)
 
 # ジュースの購入（ステップ3）
-puts "100円を入れた時の挙動、コーラの残りの本数、10, 50, 100, 500, 1000しか入らない"
-pc.maney_and_stock_judge(vm.slot_money(500), jm.juice_name[:number])
+puts "お金を投入してください。お金の投入を終了する場合は、10,50,100,500,1000円以外の値を入力してください"
+pc.maney_and_stock_judge(vm.slot_money(gets.to_i), jm.juice_name[:number])
 
 # 作成した自動販売機に入れたお金を返してもらう
 puts "作成した自動販売機に入れたお金を返してもらう"
