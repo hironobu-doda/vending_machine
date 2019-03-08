@@ -24,23 +24,32 @@ class VendingMachine
 
     # 想定外のもの（１円玉や５円玉。千円札以外のお札、そもそもお金じゃないもの（数字以外のもの）など）
     # が投入された場合は、投入金額に加算せず、それをそのまま釣り銭としてユーザに出力する。
-    return @slot_money unless MONEY.include?(money)
-    # 自動販売機にお金を入れる
-    @slot_money += money
-    puts "現在#{@slot_money}円が投入されています"
-    puts "続けてお金を投入してください。お金の投入を終了する場合は、10,50,100,500,1000円以外の値を入力してください"
-    # 再帰処理
-    slot_money(gets.to_i)
+    if MONEY.include?(money)
+      @slot_money += money
+      puts "現在#{@slot_money}円が投入されています。"
+      puts "続けてお金を投入してください。払い戻しの場合は[0]、ジュースを購入する場合は[1]を入力してください。"
+      slot_money(gets.to_i)
+    elsif money == 0
+      return_money
+      exit
+    elsif money == 1
+      return @slot_money
+    else
+      puts "使えないお金なので返却します。"
+      puts "現在#{@slot_money}円が投入されています。"
+      puts "続けてお金を投入してください。払い戻しの場合は[0]、ジュースを購入する場合は[1]を入力してください。"
+      slot_money(gets.to_i)
+    end
   end
 
   # 購入可能なドリンクリスト
   def purchasable_drinks
     if @slot_money >= 200
-      puts "『レッドブル、コーラ、水』が買えます"
+      puts "『レッドブル、コーラ、水』が買えます。"
     elsif @slot_money >=120
-      puts "『コーラ、水』が買えます"
+      puts "『コーラ、水』が買えます。"
     elsif @slot_money >= 100
-      puts "『水』が買えます"
+      puts "『水』が買えます。"
     end
   end
 
@@ -48,7 +57,7 @@ class VendingMachine
   # 返すお金の金額を表示する
   # 自動販売機に入っているお金を0円に戻す
   def return_money
-    puts @slot_money
+    puts "#{@slot_money}円返却します。"
     @slot_money = 0
   end
 end
@@ -69,70 +78,64 @@ class Juice_management
     end
   end
 
-  # どのジュースを買うか選択させるメソッド
-  # def purchase_selection
-  #   puts "購入したいジュースの番号を入力してください"
-  #   puts "1: コーラ"
-  #   puts "2: レッドブル"
-  #   puts "3: 水"
-  #   selection = gets.to_i
-  #   case selection
-  #     when 1
-  #       puts "コーラを購入します"
-  #       puts @juice1[:number]
-  #     when 2
-  #       puts "レッドブルを購入します"
-  #     when 3
-  #       puts "水を購入します"
-  #     else
-  #       puts "残念"
-  #   end
-  # end
-# end
-#
-# # ステップ３ 購入(Purchase)
-# class Purchase
+
 
   # どのジュースを買うか選択させるメソッド
   def purchase_selection
-    puts "購入したいジュースの番号を入力してください"
+    puts "購入したいジュースの番号を入力してください。"
     puts "1: コーラ"
     puts "2: レッドブル"
     puts "3: 水"
     selection = gets.to_i
     case selection
       when 1
-        puts "コーラを購入します"
+        puts "コーラを購入します。"
+        # puts @juice1[:number] - 1
         return @juice1
       when 2
-        puts "レッドブルを購入します"
+        puts "レッドブルを購入します。"
         return @juice2
       when 3
-        puts "水を購入します"
+        puts "水を購入します。"
         return @juice3
+      when 0
+        puts @change
+        exit
       else
-        puts "1,2,3番から選択してください"
+        puts "1,2,3番から選択してください。"
         purchase_selection
     end
   end
 
+  def initialize
+    @current_sales_amount = 0
+  end
+
   # 投入金額、在庫の点で購入できるか判定するメソッド
-  def maney_and_stock_judge(money, number, price)
+  def maney_and_stock_judge(money, number, price, name)
     if money >= price && number > 0
-      puts "何本買うか入力してください"
-      purchase_number =  gets.to_i
-      # 在庫が0未満の場合、または投入額より購入額が多い場合は再入力
-      if (number - purchase_number) < 0 || (money - price * purchase_number) < 0
-        puts "本数を減らしてください"
-        maney_and_stock_judge(money, number, price)
-      else
-        current_sales_amount = price * purchase_number
-        stock = number - purchase_number
-        change = money - price * purchase_number
-        puts "現在の売り上げ金額：#{current_sales_amount}、在庫：#{stock}本、釣り銭：#{change}円"
+      @current_sales_amount += price
+      stock = number - 1
+      @change = money - price
+      # current_sales_amount = money + change
+      puts "現在の売り上げ金額：#{@current_sales_amount}円、#{name}の在庫：#{stock}本、釣り銭：#{@change}円"
+
+      # もしprice ==120 ならコーラの本数を1本減らす、
+      if price == 120
+        @juice1[:number] = stock
+      elsif price == 200
+        @juice2[:number] = stock
+      elsif price == 100
+        @juice3[:number] = stock
       end
+
+      
+
+      # ここから繰り返し
+      ps = purchase_selection
+      maney_and_stock_judge(@change, ps.values[2], ps.values[1], ps.values[0])
     else
-     puts "お金か在庫が足りないです"
+      puts "お金か在庫が足りないです。"
     end
   end
 end
@@ -150,7 +153,7 @@ jm = Juice_management.new
 jm.juice_name
 
 # 2.お金の投入
-puts "10,50,100,500,1000円を入力してください"
+puts "[10,50,100,500,1000円]を入力してください。"
 total_fee = vm.slot_money(gets.to_i)
 
 # 3.購入可能なドリンクリスト
@@ -160,4 +163,4 @@ vm.purchasable_drinks
 juice_information = jm.purchase_selection
 
 # 5.ジュースの購入（ステップ3）
-jm.maney_and_stock_judge(total_fee, juice_information[:number], juice_information[:price])
+jm.maney_and_stock_judge(total_fee, juice_information[:number], juice_information[:price], juice_information[:name])
